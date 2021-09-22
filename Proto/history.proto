@@ -1,0 +1,33 @@
+//暂时不管
+syntax = "proto3";
+
+import "system.proto";
+
+package Pb;
+
+
+/// 角色信息
+message BattleRole
+{
+    uint32 role_id              = 1;        // 角色ID
+    string role_name            = 2;        // 角色名称
+    uint32 role_type            = 3;        // 角色类型
+    string role_img             = 4;        // 角色头像
+    uint32 role_seat            = 5;        // 角色座位号
+    uint32 is_ready             = 6;        // 是否已准备
+    int32 role_score            = 7;        // 对战积分
+}
+
+/// 对战记录
+message BattleHistory
+{
+    uint64 room_id              = 1;        // 房间ID
+    string room_name            = 2;        // 房间名称
+    uint32 role_id              = 3;        // 房间创建者角色ID
+    string role_name            = 4;        // 房间创建者角色名称
+    uint32 game_type            = 5;        // 玩法类型
+    uint32 difficulty           = 6;        // 玩法难度
+    string password             = 7;        // 房间密码
+    repeated BattleRole role_info = 8;      // 玩家信息
+    AcpcState state             = 9;        // 对战信息
+}

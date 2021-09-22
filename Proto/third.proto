@@ -1,0 +1,249 @@
+syntax = "proto3";
+
+option cc_generic_services=false;
+
+package Pb;
+
+//命令字
+enum THIRD_CMD
+{
+    THIRD_CMD_NOT_DEFINE                  = 0;
+    THIRD_CMD_LOGIN_AISVR_REQ             = 9001;//登录游戏请求
+    THIRD_CMD_LOGIN_AISVR_RSP             = 9002;//登录游戏反馈
+    THIRD_CMD_KEEPALIVE_REQ               = 9003;//连接心跳请求
+    THIRD_CMD_KEEPALIVE_RSP               = 9004;//连接心跳反馈
+    THIRD_CMD_ROBOT_ACTION_REQ            = 9005;//机器决策请求
+    THIRD_CMD_ROBOT_ACTION_RSP            = 9006;//机器决策结果
+    THIRD_CMD_GAME_BEGIN_NOTIFY           = 9007;//游戏开始通知
+    THIRD_CMD_GAME_BANKER_NOTIFY          = 9008;//游戏庄家通知
+    THIRD_CMD_GAME_SENDCARD_NOTIFY        = 9009;//游戏发牌通知
+    THIRD_CMD_GAME_TOKENTO_NOTIFY         = 9010;//游戏下注通知
+    THIRD_CMD_GAME_ACTION_NOTIFY          = 9011;//游戏行为通知
+    THIRD_CMD_GAME_RESULT_NOTIFY          = 9012;//游戏结果通知
+    THIRD_CMD_GAME_STATDATA_REQ           = 9013;//游戏统计报告
+    THIRD_CMD_GAME_STATDATA_RSP           = 9014;//游戏统计报告
+    
+    THIRD_CMD_GAME_QUERY_STATE_REQ        = 9098;//查询游戏状态[测试接口]
+    THIRD_CMD_GAME_QUERY_STATE_RSP        = 9099;//查询游戏状态[测试接口]
+    THIRD_CMD_MAX_VALUE                   = 9999;//
+}
+
+//错误码
+enum THIRD_ERR
+{
+    THIRD_SUCC     = 0;          // 成功
+    THIRD_FAIL     = 1;          // 失败
+}
+
+//登录服务请求
+message ThirdLoginAiSvrReq
+{
+    string token    = 1; //连接密钥
+    //repeated int64 robotids = 2; //机器标识列表
+}
+
+message ThirdLoginAiSvrRsp
+{
+    int32          resultCode = 1; //操作结果
+    //repeated int64 robotids   = 2; //有效机器列表
+}
+
+//连接心跳
+message ThirdKeepAliveReq
+{
+    int32 timestamp = 1;
+}
+
+message ThirdKeepAliveRsp
+{
+    int32 timestamp = 1;
+}
+
+//机器人决策
+message ThirdRobotActionReq
+{
+    string roomid    = 1;
+    uint32 round     = 2;    //0:preflop 1:flop 2:turn 3:river
+}
+
+message ThirdRobotActionRsp
+{
+    int32 resultCode = 1;
+    int32 actionType = 2;   //0:fold 1:call 2:raise
+    int64 betNum     = 3;   //加注值 
+    string err_msg   = 4;   //错误消息
+}
+
+//游戏开始通知
+message ThirdGameBeginNotify
+{
+    string roomid       = 1;
+    uint32 hand         = 2;    //hand id
+    int64  player_id    = 3;    //玩家ID
+    int32  player_score = 4;    //玩家积分
+    int64  bankerid     = 5;    //庄家ID
+    int32  ai_mode      = 6;    //1:初级 2:中级 3:高级
+}
+
+//游戏庄家通知
+message ThirdGameBankerNotify
+{
+    string roomid   = 1;
+    int64  bankerid = 2;        //庄家ID
+}
+
+//游戏发牌通知
+message ThirdGameSendCardsNotify
+{
+    string roomid                  = 1;
+    uint32 round                   = 2;    //0:preflop 1:flop 2:turn 3:river 
+    repeated int32 robot_cards     = 3;    //机器人私牌
+    repeated int32 board_cards     = 4;    //公牌
+}
+
+//游戏下注通知 -- 通知机器人出牌
+message ThirdGameTokenToNotify
+{
+    string roomid = 1;
+    int64  robot_id  = 2;
+}
+
+//游戏行为通知 -- 玩家下注时的通知
+message ThirdGameActionNotify
+{
+    string roomid     = 1;
+    int64  player_id  = 2;      //玩家ID
+    int32  actionType = 3;      //0:fold 1:call 2:raise
+    int32  betNum     = 4;      //加注值 
+}
+
+//游戏结束通知
+message ThirdGameEndNotify
+{
+    string roomid               = 1;
+    uint32 hand                 = 2;    //hand id
+    int32  robotResult          = 3;    //机器人得分
+    repeated int32 player_cards = 4;    //玩家私牌
+    repeated int32 board_cards  = 5;    //全部已发的公牌
+}
+
+//测试接口
+message ThirdGameQueryStateReq
+{
+    string roomid    = 1;
+}
+
+message ThirdGameQueryStateRsp
+{
+    int32 finished              = 1;    //结束标记
+    int32 round                 = 2;    //轮
+    int64 next_turn_id          = 3;    //下一个出牌的ID
+    repeated int32 allow_raise  = 4;    //允许的加注列表
+}
+
+//牌局统计报告
+message ThirdGameStatDataReq
+{
+    int64 uid    =1;
+    string start =2;    //开始时间: 20060102
+    string end   =3;    //结束时间
+}
+
+message ThirdGameStatDataRsp
+{
+    int32 resultCode = 1;
+    int64 uid        = 2;
+    uint32 vpip=3;//主动入池率
+    uint32 pfr=4;//加注入池率
+    uint32 showdown =5;//摊牌率
+    uint32 cbet=6;//持续下注
+    uint32 win_showdown =7;//摊牌胜率
+    uint32 three_bet =8;//3bet
+
+    uint32 vpip_bb=9;//
+    uint32 vpip_btn=10;
+    uint32 fold_to_three_bet=11;
+    uint32 fold_to_four_bet=12;
+    uint32 four_bet=13;
+    uint32 call_five_bet=14;
+    uint32 fold_to_five_bet=15;
+    uint32 limp=16;
+    uint32 limp_raise=17;
+
+    uint32 single_cbet=18;
+	uint32 single_cbet_ip=19;
+	uint32 single_cbet_oop=20;
+	uint32 single_cbet_check_raise=21;
+	uint32 single_cbet_fold_to_raise=22;
+	uint32 single_cbet_call_raise=23;
+	uint32 single_cbet_reraise=24;
+
+	uint32 single_barreling=25;
+	uint32 single_double_barreling=26;
+	uint32 single_tripple_barreling=27;
+
+	uint32 single_fold_to_cbet=28;
+	uint32 single_fold_to_cbet_ip=29;
+	uint32 single_fold_to_cbet_oop=30;
+	uint32 single_call_cbet=31;
+	uint32 single_call_cbet_ip=32;
+	uint32 single_check_call_cbet_oop=33;
+	uint32 single_raise_cbet=34;
+	uint32 single_check_raise_cbet=35;
+	uint32 single_miss_cbet_bet_ip=36;
+	uint32 single_miss_cbet_bet_oop=37;
+	uint32 single_donk=38;
+	uint32 single_call_fold_to_double_barrel=39;
+	uint32 single_call_call_fold_to_tripple_barrel=40;
+
+	uint32 tbet_cbet=41;
+	uint32 tbet_cbet_ip=42;
+	uint32 tbet_cbet_oop=43;
+	uint32 tbet_cbet_check_raise=44;
+	uint32 tbet_cbet_fold_to_raise=45;
+	uint32 tbet_cbet_call_raise=46;
+	uint32 tbet_cbet_reraise=47;
+
+	uint32 tbet_barreling=48;
+	uint32 tbet_double_barreling=49;
+	uint32 tbet_tripple_barreling=50;
+
+	uint32 tbet_fold_to_cbet=51;
+	uint32 tbet_fold_to_cbet_ip=52;
+	uint32 tbet_fold_to_cbet_oop=53;
+	uint32 tbet_call_cbet=54;
+	uint32 tbet_call_cbet_ip=55;
+	uint32 tbet_check_call_cbet_oop=56;
+	uint32 tbet_raise_cbet=57;
+	uint32 tbet_check_raise_cbet=58;
+	uint32 tbet_miss_cbet_bet_ip=59;
+	uint32 tbet_miss_cbet_bet_oop=60;
+	uint32 tbet_donk=61;
+	uint32 tbet_call_fold_to_double_barrel=62;
+	uint32 tbet_call_call_fold_to_tripple_barrel=63;
+
+
+	uint32 bet_turn=64;
+	uint32 bet_turn_over_bet=65;
+	uint32 bet_turn_standard_bet=66;
+	uint32 bet_turn_half_pot=67;
+	uint32 bet_turn_small_pot=68;
+	uint32 raise_turn=69;
+	uint32 raise_turn_bluff=70;
+	uint32 raise_turn_bluff_toppair=71;
+	uint32 bet_river=72;
+	uint32 bet_river_over_bet=73;
+	uint32 bet_river_standard_bet=74;
+	uint32 bet_river_half_pot=75;
+	uint32 bet_river_small_pot=76;
+	uint32 bet_river_value=77;
+	uint32 bet_river_bluff=78;
+	uint32 bet_river_bluff_toppair=79;
+	uint32 raise_river=80;
+	uint32 raise_river_bluff=81;
+	uint32 raise_river_bluff_toppair=82;
+	uint32 call_down_river  = 83;
+    string err_msg          = 84;
+    uint32 win  = 85;
+    
+}

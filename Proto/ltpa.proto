@@ -1,0 +1,352 @@
+/* file   : tpa.proto
+*  brief  : 第三方平台接入AI对战的协议描述
+*  not    : 各命令字、错误码、业务协议的定义,只能新增,不能修改和删除  
+*/
+syntax = "proto3";
+import "system.proto";
+package Pb;
+
+// --------------- start 公共结构体   ---------------------
+//玩家信息
+message LTPAPlayer
+{
+    uint32 role_id  	                = 1;    // 用户标识		
+    uint64 player_id                    = 2;    // tpa用户标识
+    int32  seat	                        = 3;    // 玩家位置	值范围(0 - [n-1])
+    int32  is_ready                     = 4;    // 就绪状态 0:未就绪 1:已就绪
+    int32  money                        = 5;    // 筹码
+}
+
+
+//玩家状态
+message LTPAPlayerState
+{
+    uint32 role_id  	                = 1;    // 用户标识		
+    uint64 player_id                    = 2;    // tpa用户标识
+    int32  seat                         = 3;    // 玩家位置	值范围(0 - [n-1])
+    uint32 spent                        = 4;    // 总下注值
+    uint32 fold                         = 5;    // 弃牌标记 0:未弃牌 1:弃牌 
+    repeated int32 hole_cards           = 6;    // 私牌 (finished!=1时仅有被通知玩家的私牌为有效值)
+}
+
+//玩家动作
+message LTPAPlayerAction
+{
+    uint32 role_id  	                = 1;    // 用户标识	
+    uint64 player_id                    = 2;    // tpa用户标识
+    int32  seat                         = 3;    // 玩家位置	值范围(0 - [n-1])
+    int32  round                        = 4;    // 所在的轮次
+    uint32 type                         = 5;    // 类型 0:弃牌  1:跟注或过牌  2:加注
+    int32  size                         = 6;    // 筹码大小
+}
+
+//玩家牌信息
+message LTPAPlayerCards
+{
+    uint32 role_id  	                = 1;    // 用户标识	
+    repeated int32 hole_cards           = 2;    // 私牌
+}
+
+// ---------------  end 公共结构体    ----------------------
+   
+//玩家加入房间 -- CMD_TPA_ENTER_ROOM
+message LTpaEnterRoomReq
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识	
+    uint32 tpa_room_id                  = 2;    // tpa房间标识
+    uint32 game_type                    = 3;    // 游戏类型 (2:两人游戏)
+    repeated LTPAPlayer player_list     = 4;    // 玩家列表
+    uint32 tpa_server_id                = 5;    // tpa服务ID
+}
+
+message LTpaEnterRoomResp
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识		
+    uint32 tpa_room_id                  = 2;    // tpa房间标识
+    uint32 game_type                    = 3;    // 游戏类型 (2:两人游戏)
+    repeated LTPAPlayer player_list     = 4;    // 玩家列表
+}
+// --------------------------
+
+
+
+//请求AI加入房间 CMD_TPA_AI_ENTER_ROOM
+message LTpaAIEnterRoomReq
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识		
+    uint32 tpa_room_id                  = 2;    // tpa房间标识
+    uint32 game_type                    = 3;    // 游戏类型 (2:两人游戏)
+    repeated LTPAPlayer player_list     = 4;    // AI的玩家列表
+    string constant_token               = 5;    // 透穿参数
+}
+
+message LTpaAIEnterRoomResp
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识		
+    uint32 tpa_room_id                  = 2;    // tpa房间标识
+    uint32 game_type                    = 3;    // 游戏类型
+    repeated LTPAPlayer player_list     = 4;    // 玩家列表 (包括机器人和玩家)
+    string constant_token               = 5;    // 透穿参数[与请求一致]
+}
+// --------------------------
+
+
+
+//玩家退出房间 -- CMD_TPA_LEAVE_ROOM
+message LTpaLeaveRoomReq
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识		
+    uint32 tpa_room_id                  = 2;    // tpa房间标识
+    repeated LTPAPlayer player_list     = 3;    // 玩家列表
+    
+}
+
+message LTpaLeaveRoomResp
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识		
+    uint32 tpa_room_id                  = 2;    // tpa房间标识
+    repeated LTPAPlayer player_list     = 3;    // 玩家列表	
+}
+// --------------------------
+
+
+
+//销毁房间通知 -- CMD_TPA_NOTIFY_DESTROY_ROOM
+message LTpaNotifyDestroyRoom
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识		
+    uint32 tpa_room_id                  = 2;    // tpa房间标识
+    uint32 reason                       = 3;    // 原因   1:机器人异常退出
+}
+// --------------------------
+
+
+
+//设置玩家状态 -- CMD_TPA_SET_PLAYER_STATE
+message LTpaSetPlayerStateReq
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识		
+    uint32 tpa_room_id                  = 2;    // tpa房间标识
+    repeated LTPAPlayer player_list     = 3;    // 玩家列表
+}
+
+message LTpaSetPlayerStateResp
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识		
+    uint32 tpa_room_id                  = 2;    // tpa房间标识
+    repeated LTPAPlayer player_list     = 3;    // 玩家列表
+}
+// --------------------------
+
+
+
+//设置庄家 -- CMD_TPA_SET_DEALER
+message LTpaSetDealerReq
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识
+    uint32 dealer_role_id               = 2;    // 庄家用户标识	
+    uint32 tpa_room_id                  = 3;    // tpa房间标识
+    uint64 dealer_player_id             = 4;    // TPA庄家用户标识	
+    int32  dealer_seat                  = 5;    // 庄家位置
+}
+
+message LTpaSetDealerResp
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识		
+    uint32 dealer_role_id               = 2;    // 庄家用户标识	
+    uint32 tpa_room_id                  = 3;    // tpa房间标识
+    uint64 dealer_player_id             = 4;    // tpa庄家用户标识
+    uint32 hand_id                      = 5;    // 局数ID
+    uint32 max_spent                    = 6;    // 局数ID
+    repeated LTPAPlayerState player_state= 7;    // 所有玩家的状态
+}
+// --------------------------
+
+
+//查询游戏扑克信息 -- CMD_TPA_QUERY_MATCH_CARDS
+message LTpaQueryCardsReq
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识	
+    uint32 tpa_room_id                  = 2;    // tpa房间标识
+    int32  round                        = 3;    // 轮
+}
+
+message LTpaQueryCardsResp
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识		
+    uint32 tpa_room_id                  = 2;    // tpa房间标识
+    int32  round                        = 3;    // 当前轮 0:preflop 1:flop 2:turn 3:river
+    uint32 finished                     = 4;    // 是否结束 0:未结束  1:结束
+    repeated int32 flop_cards           = 5;    // flop公牌
+    repeated int32 turn_cards           = 6;    // turn公牌
+    
+    repeated int32 river_cards          = 7;    // river公牌
+    repeated LTPAPlayerCards player_cards= 8;   // 玩家私牌
+    uint32 dealer_role_id               = 9;    // 庄家标识
+}
+// --------------------------
+
+
+//查询允许加注信息 -- CMD_TPA_QUERY_ALLOW_ACTION
+message LTpaQueryAllowActionReq
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识		
+    uint32 role_id                      = 2;    // 玩家标识
+    uint32 tpa_room_id                  = 3;    // tpa房间标识
+    uint64 player_id                    = 4;    // tpa玩家标识
+}
+
+message LTpaQueryAllowActionResp
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识		
+    uint32 role_id                      = 2;    // 玩家标识
+    uint32 tpa_room_id                  = 3;    // tpa房间标识
+    uint64 player_id                    = 4;    // tpa玩家标识
+    repeated uint32 allow_raise         = 5;    // 下次允许的加注值
+}
+// --------------------------
+
+
+//查询游戏状态信息 -- CMD_TPA_QUERY_MATCH_STATE
+message LTpaQueryMatchStateReq
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识		
+    uint32 tpa_room_id                  = 2;    // tpa房间标识
+    int32  round                        = 3;    // 轮 0:preflop 1:flop 2:turn 3:river  -1:全量
+}
+
+message LTpaQueryMatchStateResp
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识		
+    uint32 dealer_role_id               = 2;    // 庄家的用户标识
+    uint32 tpa_room_id                  = 3;    // tpa房间标识
+    uint32 hand_id                      = 4;    // 场次ID
+    int32  round                        = 5;    // 当前轮 0:preflop 1:flop 2:turn 3:river
+    uint32 finished                     = 6;    // 是否结束 0:未结束  1:结束
+    
+    uint32 max_spent                    = 7;    // 最大加注
+    repeated int32 flop_cards           = 8;    // flop公牌
+    repeated int32 turn_cards           = 9;    // turn公牌
+    repeated int32 river_cards          = 10;    // river公牌
+    repeated uint32 allow_raise         = 11;   // 下次允许的加注值
+    
+    repeated LTPAPlayerState player_state  = 12; // 所有玩家的状态 (按位置顺序存储)
+    repeated LTPAPlayerAction player_action= 13; // 所有玩家的动作信息
+    
+    uint32 turn_role_id                 = 14;    // 轮到该玩家下注
+}
+// --------------------------
+
+
+//上报决策行动指示 -- CMD_TPA_REPORT_ACTION_TOKEN
+message LTpaReportActionTokenReq
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识	
+    uint32 role_id                      = 2;    // 出手玩家的用户标识
+    uint32 tpa_room_id                  = 3;    // tpa房间标识
+    uint64 player_id                    = 4;    // tpa玩家标识
+}
+
+message LTpaReportActionTokenResp
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识	
+    uint32 role_id                      = 2;    // 出手玩家的用户标识
+    uint32 tpa_room_id                  = 3;    // tpa房间标识
+    uint64 player_id                    = 4;    // tpa玩家标识
+}  
+// --------------------
+
+
+//上报玩家决策结果 -- CMD_TPA_REPORT_PLAYER_ACTION
+message LTpaReportPlayerActionReq
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识	
+    uint32 role_id                      = 2;    // 用户标识
+    uint32 tpa_room_id                  = 3;    // tpa房间标识
+    uint64 player_id                    = 4;    // tpa玩家标识
+    uint32 action_type                  = 5;    // 操作类型  0:弃牌 1:跟注或过牌 2:加注
+    uint32 size                         = 6;    // 筹码大小(加注到)  注:每次的加注值，由最后一个“查询游戏状态”或“玩家执行游戏动作”或“请求机器人的游戏动作”命令的应答结果指定
+}
+
+message LTpaReportPlayerActionResp
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识	
+    uint32 role_id                      = 2;    // 用户标识
+    uint32 tpa_room_id                  = 3;    // tpa房间标识
+    uint64 player_id                    = 4;    // tpa玩家标识
+    uint32 action_type                  = 5;    // 操作类型  0:弃牌 1:跟注或过牌 2:加注
+    uint32 size                         = 6;    // 筹码大小(加注到)
+    repeated uint32 allow_raise         = 7;    // 下次允许的加注值
+}
+// --------------------
+
+
+//查查询机器人决策 -- CMD_TPA_QUERY_AI_ACTION
+message LTpaQueryAIActionReq
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识	
+    uint32 role_id                      = 2;    // [机器人的]用户标识
+    uint32 tpa_room_id                  = 3;    // tpa房间标识
+    uint64 player_id                    = 4;    // tpa玩家标识
+}
+
+message LTpaQueryAIActionResp
+{
+    uint64 local_room_id                = 1;    // 本系统的房间标识	
+    uint32 role_id                      = 2;    // 用户标识
+    uint32 tpa_room_id                  = 3;    // tpa房间标识
+    uint64 player_id                    = 4;    // tpa玩家标识
+    uint32 action_type                  = 5;    // 操作类型  0:弃牌 1:跟注或过牌 2:加注
+    uint32 size                         = 6;    // 筹码大小(加注到)
+    repeated uint32 allow_raise         = 7;    // 下次允许的加注值
+}
+
+//
+//
+//
+//
+//tpa玩家存储Redis数据结构定义
+message TpaRedisPlayer
+{
+    uint64 player_id                    = 1;    //第三方系统的玩家ID
+    uint32 role_id                      = 2;    //roleID
+    uint32 seat                         = 3;    //位置
+}
+
+//tpa房间存储Redis数据结构定义
+message TpaRedisPlayerList
+{
+    repeated TpaRedisPlayer player_list = 1;     //玩家列表
+}
+
+//通知brainsvr的MatchState -- CMD_ACPC_NOTIFY_TPA_MATCH_STATE
+message TpaAcpcMatchState
+{
+    uint64 local_room_id                    = 1;        // 本系统的房间标识	
+    uint32 tpa_room_id                      = 2;        // tpa房间标识
+    uint32 role_id                          = 3;        // 目标角色ID
+    int32  role_seat                        = 4;        // 玩家位置
+    int32  little_blind_seat                = 5;        // 小盲位座位号
+    int32  hand_id                          = 6;        // 场次ID
+    int32  max_spent                        = 7;        // 当场最大下注值
+    int32  min_nolimit_raise_to             = 8;        // 当前加注最低值
+    int32  round                            = 9;        // 当前回合[0 ~ round_actions_size]
+    int32  finished                         = 10;       // 是否结束
+    
+    repeated int32 spent                    = 11;       // 各玩家下注值
+    repeated AcpcRound round_actions        = 12;       // 各回合玩家行动
+    repeated int32 fold_players             = 13;       // 放弃的玩家列表 [未放弃为0，放弃为1]
+    repeated AcpcCard board_cards           = 14;       // 公牌列表
+    repeated AcpcCard hole_cards            = 15;       // (玩家自己的)私牌列表
+    repeated HoleCards player_hole_cards    = 16;       // 所有玩家的私牌列表,finished=1时会赋值,按position顺序排列
+}
+
+//tpa独有的房间属性 -- 存储redis定义
+message RoomAttrForTpa
+{
+    uint32 tpa_room_id                      = 1;        // tpa房间标识
+    uint32 tpa_server_id                    = 2;        // tpa服务ID
+    int32  wait_robot_aciton                = 3;        // 等待AI出牌标记 1:等待中 0:机器人已出牌
+}
+
+

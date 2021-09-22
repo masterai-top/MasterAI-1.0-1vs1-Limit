@@ -1,0 +1,329 @@
+syntax = "proto3";
+
+import "system.proto";
+
+package Pb;
+
+//上报日志的基本信息
+message ReportLog
+{
+    uint32 tv_sec                           = 1;        // 上报时间(秒)
+    uint32 tv_usec                          = 2;        // 上报时间(微秒)
+    uint32 opt_time                         = 3;        // 操作耗时(单位:微秒)
+    uint32 opt_source                       = 4;        // 操作评分
+    uint32 before_pot                       = 5;        // 操作前底池
+}
+
+//上报日志基本信息列表
+message ReportLogs
+{
+    repeated ReportLog report_logs         = 1;        // 日志列表
+}
+
+//观众信息
+message Audience
+{
+    uint32 role_id                          = 1;        // 角色ID
+    string role_name                        = 2;        // 角色名称
+    string role_img                         = 3;        // 角色头像
+}
+
+
+
+/// CMD_ACPC_ROOM_CREATE  &  CMD_BM_ALLOC_BATTLE  
+message AcpcRoomCreate
+{
+    uint32 role_id              = 1;        // 创建者角色ID
+    string role_name            = 2;        // 创建者角色名称
+    string room_name            = 3;        // 房间名称
+    uint32 game_type            = 4;        // 玩法类型
+    uint32 difficulty           = 5;        // 玩法难度
+    string password             = 6;        // 房间密码
+    string version              = 7;        // 版本信息 
+    string acpc_ip              = 8;        // 对战的服务器IP
+    uint32 acpc_port            = 9;        // 对战的服务器端口
+    uint32 brain_id             = 10;        // Brain服务ID
+    uint64 room_id              = 11;        // 房间ID
+}
+
+/// 加入房间 CMD_ACPC_ROOM_ENTER  &  CMD_ACPC_ROOM_BROAD_ENTER
+/*message AcpcRoleEnterRoom
+{
+    uint64 room_id              = 1;        // 房间ID(断线重新进入房间时有效,其他情况为0)
+    uint32 role_id              = 2;        // 角色ID
+    uint32 role_type            = 3;        // 角色类型
+    string password             = 4;        // 房间密码
+    uint32 game_type            = 5;        // 玩法类型 
+    string acpc_ip              = 6;        // 对战的服务器IP(不再无用)
+    uint32 acpc_port            = 7;        // 对战的服务器端口(不再无用)
+    uint32 brain_id             = 8;        // Brain服务ID(不再无用)
+    repeated RoleInfo role_info = 9;        // 进入房间的玩家信息
+    uint32 self_role_pos        = 10;       // 自己所在role_info的位置
+    repeated Audience audience_list = 11;   // 观众列表
+    string sophia_name          = 12;       // 索菲亚名称 
+    string rm_test_param        = 13;       // 算法rm测试参数(自测版本有效)
+    uint32 join_type            = 14;       // 加入方式(请求参数) 1:普通 2:机器人 3:第三方平台
+}*/
+
+// 加入房间 CMD_ACPC_ROOM_ENTER
+message AcpcEnterRoomReq
+{
+    uint64 room_id              = 1;        // 房间ID(断线重新进入房间时有效,其他情况为0)
+    uint32 role_id              = 2;        // 角色ID
+    uint32 game_type            = 3;        // 玩法类型 
+    string sophia_name          = 4;        // 索菲亚名称 
+    string rm_test_param        = 5;        // 算法rm测试参数
+    uint32 join_type            = 6;        // 加入方式(请求参数) 1:普通 2:机器人 3:第三方平台
+}
+
+message AcpcEnterRoomResp
+{
+    uint64 room_id              = 1;        // 房间ID(断线重新进入房间时有效,其他情况为0)
+    uint32 role_id              = 2;        // 角色ID
+    uint32 game_type            = 3;        // 玩法类型 
+    uint32 self_role_pos        = 4;        // 自己所在role_info的位置
+    repeated RoleInfo role_info = 5;        // 已在房间所有玩家的信息
+    repeated Audience audience_list = 6;    // 观众列表
+    string rm_test_param        = 7;        // 算法rm测试参数(自测版本有效)
+    uint32 hand_id              = 8;        // 局ID
+}
+
+//其他玩家加入房间通知 CMD_ACPC_ROOM_BROAD_ENTER
+message AcpcEnterRoomBroad
+{
+    uint64 room_id              = 1;        // 房间ID
+    uint32 role_id              = 2;        // (被通知的)角色ID
+    RoleInfo enter_role_info    = 3;        // 进入房间的玩家信息
+    string rm_test_param        = 4;        // 算法rm测试参数(自测版本有效)
+}
+
+/// CMD_ACPC_ROOM_LEAVE  &  CMD_ACPC_ROOM_BROAD_LEAVE  &  CMD_ACPC_ROOM_FORCE_LEAVE  &  CMD_ACPC_ROOM_BROAD_FORCE_LEAVE[观众专用]
+/*message AcpcRoleLeaveRoom
+{
+    uint32 role_id              = 1;        // 角色ID(接收消息或主动发起消息的role_id)
+    uint32 leave_id             = 2;        // 离开的角色ID
+    uint32 leave_type           = 3;        // 离开的角色类型
+    uint64 room_id              = 4;        // 房间ID
+}*/
+
+//离开房间 CMD_ACPC_ROOM_LEAVE & CMD_ACPC_ROOM_FORCE_LEAVE[主动推送]
+message AcpcLeaveRoomReq
+{
+    uint32 role_id              = 1;        // 角色ID(接收消息或主动发起消息的role_id)
+    uint64 room_id              = 2;        // 房间ID
+}
+
+message AcpcLeaveRoomResp
+{
+    uint32 role_id              = 1;        // 角色ID
+    uint64 room_id              = 2;        // 房间ID
+    uint32 reason               = 3;        // 原因   0:主动请求的应答   1:超时强制退出   2:错误强制退出
+}
+
+//其他玩家离开房间通知 CMD_ACPC_ROOM_BROAD_LEAVE & CMD_ACPC_ROOM_BROAD_FORCE_LEAVE
+message AcpcLeaveRoomBroad
+{
+    uint32 role_id              = 1;        // (被通知的)角色ID
+    uint64 room_id              = 2;        // 房间ID
+    uint32 leave_role_id        = 3;        // 离开房间的角色ID
+}
+
+// CMD_ACPC_ROOM_QUERY_CAN_JOIN
+message AcpcQueryCanJoinRoom
+{
+    repeated RoomCanJoin room_list  = 1;
+}
+
+/// CMD_ACPC_MATCH_READY  &  CMD_ACPC_MATCH_BROAD_READY
+/*message AcpcRoleReady
+{
+    uint32 role_id                  = 1;        // 角色ID(接收消息或主动发起消息的role_id)
+    uint32 ready_id                 = 2;        // 就绪的角色ID    
+    uint32 ready_type               = 3;        // 就绪的角色类型    
+    uint32 dealer_mode              = 4;        // 荷官模式  0:自动发牌  1:平台发牌
+}*/
+
+//玩家就绪 CMD_ACPC_MATCH_READY
+message AcpcReadyReq
+{
+    uint32 role_id                  = 1;        // 角色ID
+    uint64 room_id                  = 2;        // 房间ID
+    string cfr_model                = 3;        // 算法模型
+    uint32 dealer_mode              = 4;        // 荷官模式  0:自动发牌  1:平台发牌 2:区块链发牌
+}
+
+message AcpcReadyResp
+{
+    uint32 role_id                  = 1;        // 角色ID
+    uint32 dealer_mode              = 2;        // 荷官模式  0:自动发牌  1:平台发牌
+    uint64 room_id                  = 3;        // 房间ID
+}
+
+//其他玩家就绪的通知
+message AcpcReadyBroad
+{
+    uint32 role_id                  = 1;        // (被通知的)角色ID
+    uint32 ready_role_id            = 2;        // 就绪的角色ID    
+    uint64 room_id                  = 3;        // 房间ID
+}
+
+/// CMD_ACPC_MATCH_BROAD_START
+message AcpcMatchStart
+{
+    uint64 room_id                  = 1;        // 房间ID
+    uint32 role_id                  = 2;        // 角色ID
+    uint32 hand_id                  = 3;        // 对战局次
+}
+
+/// CMD_ACPC_MATCH_ACTION
+message AcpcRoleAction
+{
+    uint32 role_id                  = 1;        // 玩家ID    
+    uint32 action                   = 2;        // 玩家行动类型
+    uint32 size                     = 3;        // 加注值
+    string action_rate              = 4;        // 动作概率(测试字段)
+    uint64 room_id                  = 5;        // 房间ID
+    string robot_cfr_model_param    = 6;        // 机器人算法模型参数
+}
+
+//对战动作广播 -- CMD_ACPC_BROAD_MATCH_ACTION
+message AcpcBroadRoleAction
+{
+    uint32 role_id                  = 1;        // 被通知的RoleID
+    uint32 action_role_id           = 2;        // 指定动作的RoleID
+    uint32 action                   = 3;        // 行动类型
+    uint32 size                     = 4;        // 加注值
+    uint64 room_id                  = 5;        // 房间ID
+}
+
+/// CMD_ACPC_MATCH_STATE
+message AcpcMatchState
+{
+    uint64 room_id                  = 1;        // 房间ID
+    uint32 role_id                  = 2;        // 角色ID
+    AcpcState state                 = 3;        // 游戏状态
+    AcpcRoleAction robot_action     = 4;        // 机器人Action信息(支持Sophia功能字段)
+    string cfr_model                = 5;        // 算法模型版本信息
+    uint32 robot_delay_flag         = 6;        // 机器人延时标记 0:不延时  1:动作延时  2:轮间延时
+    string robot_cfr_model_param    = 7;        // 机器人算法模型参数
+}
+
+/// CMD_ACPC_MATCH_SCORE
+message AcpcMatchScore
+{
+    uint64 room_id                  = 1;        // 房间ID
+    uint32 role_id                  = 2;        // 角色ID
+    repeated RoleScore role_scores  = 3;        // 玩家积分列表
+}
+
+//CMD_ACPC_START_ROBOT_FOR_TEST & CMD_ACPC_DEL_ALL_ROOM_FOR_TEST
+message AcpcForTest
+{
+    string password                 = 1;        // 密码
+    uint32 robot_cnt                = 2;        // 启动的机器人数
+    uint32 game_type                = 3;        // 玩法类型
+}
+
+//校验房间是否有效  CMD_ACPC_ROOM_CHECK_TIMEOUT
+message CheckRoomTimeout
+{
+    uint64 room_id                  = 1;        // 房间ID
+}
+
+//CMD_ACPC_SET_DEALER_MODE
+message SetDealerMode
+{
+    uint64 room_id                  = 1;        // 房间ID
+    uint32 role_id                  = 2;        // 角色ID
+    uint32 dealer_mode              = 3;        // 荷官模式  0:自动发牌  1:平台发牌
+}
+
+//玩家状态
+message RoleState
+{
+    uint32 spent                        = 1;    // 总下注值
+    uint32 fold                         = 2;    // 弃牌标记 0:未弃牌 1:弃牌 
+    repeated AcpcCard hole_cards        = 3;    // 私牌 (finished!=1时仅有被通知玩家的私牌为有效值)
+    int32 Score                         = 4;    // 结算积分(finished=1时有效)
+    int32 turn                          = 5;    // 轮到玩家下注标记 0:否 1:是
+}
+
+//玩家动作
+message RoleAction
+{
+    uint32 seat                        = 1;    // 玩家出牌的位置
+    uint32 round                       = 2;    // 所在的轮次
+    uint32 type                        = 3;    // 类型 0:弃牌  1:跟注或过牌  2:加注
+    int32  size                        = 4;    // 筹码大小
+}
+
+//查询游戏状态 -- CMD_ACPC_QUERY_MATCH_STATE
+message QueryMatchStateReq
+{
+    uint32 role_id                      = 1;    // 用户标识
+}
+
+message QueryMatchStateResp
+{
+    uint64 room_id                      = 1;    // 房间标识	
+    uint32 dealer_role_id               = 2;    // 庄家的用户标识
+    uint32 role_id                      = 3;    // 用户标识
+    uint32 hand_id                      = 4;    // 场次ID
+    uint32 round                        = 5;    // 当前轮 0:preflop 1:flop 2:turn 3:river
+    
+    uint32 finished                     = 6;    // 是否结束 0:未结束  1:结束
+    uint32 max_spent                    = 7;    // 最大加注
+    repeated AcpcCard board_cards       = 8;    // 公牌
+    repeated uint32 allow_raise         = 9;    // 当前允许的加注值
+    repeated RoleState role_state       = 10;   // 所有玩家的状态 (按位置顺序存储)
+    
+    repeated RoleAction role_action	    = 11;    // 所有玩家的动作信息
+}
+
+//存储redis房间的基本信息
+message RedisRoomBase
+{
+    uint64 room_id                      = 1;    // 房间ID
+    uint32 game_type                    = 2;    // 游戏类型
+    string robot_param                  = 3;    // 机器人参数
+    string sophia_name                  = 4;    // 索菲亚名称
+    uint32 dealer_mode                  = 5;    // 荷官发牌模式  0:自动发牌 1:荷官平台发牌 2:区块链发牌
+    uint32 alloc_seat                   = 6;    // 分配的座位号，按位从低到高位分配
+    uint32 expire_time                  = 7;    // 执行expire的时间
+}
+
+
+//存储redis房间的Action相关的信息
+message RedisRoomAction
+{
+    //1-10对应State结构
+    int32 hand_id                           = 1;        // 场次ID
+    int32 max_spent                         = 2;        // 当场最大下注值
+    int32 min_nolimit_raise_to              = 3;        // 当前加注最低值
+    repeated int32 spent                    = 4;        // 各玩家下注值
+    repeated AcpcRound round_actions        = 5;        // 各回合玩家行动
+    int32 round                             = 6;        // 当前回合[0 ~ round_actions_size]
+    int32 finished                          = 7;        // 是否结束
+    repeated int32 fold_players             = 8;        // 放弃的玩家列表 [未放弃为0，放弃为1]
+    repeated AcpcCard board_cards           = 9;        // 公牌列表
+    repeated AcpcCard hole_cards            = 10;       // 私牌列表
+    repeated int32 round_spent              = 11;       // 各轮的下注值
+    
+    //其他参数
+    uint32 dealer_round                     = 12;       //荷官发牌的轮数
+    uint32 action_time                      = 13;       //动作概率信息
+    string action_rate                      = 14;       //最后一次Action的时间
+    string report_logs                      = 15;       //上报日志基本信息列表    
+}
+
+//存储redis房间的Ready相关的信息
+message RedisRoomReady
+{
+    repeated RoomRole role_info             = 1;        // 角色列表
+    bool    is_running                      = 2;        // 是否比赛中状态
+    uint32  game_time                       = 3;        // 游戏开始的时间
+    uint32  p0seat                          = 4;        // 小盲的位置号
+    uint32  tcards_index                    = 5;        // 测试控牌的下标
+    string  cfr_model                       = 6;        // 算法模型
+}
+

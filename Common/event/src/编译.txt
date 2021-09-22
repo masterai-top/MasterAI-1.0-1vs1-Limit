@@ -1,0 +1,14 @@
+aclocal
+
+autoconf
+
+autoheader
+
+sh autogen.sh
+
+automake --add-missing
+
+/configure --prefix=安装路径 选项 [./configure --prefix=/home/zhonghailong/test/libevent --disable-shared]
+
+make; make install
+

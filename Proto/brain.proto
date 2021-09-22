@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+import "system.proto";
+
+package Pb;
+
+/// Brain消息码 定义
+enum NETMSG_BRAIN
+{
+    NETMSG_BRAIN_UNKNOW	        = 0;		// 未定义    
+    NETMSG_BRAIN_ROBOT_ACTION   = 1;        // 请求AI行动 C->S
+}
+
+// 请求行动数据
+message RobotActionInfo
+{
+    uint32 robot_pos            = 1;        // 坐席号
+    uint32 game_type            = 2;        // 游戏类型
+    uint32 difficulty           = 3;        // 游戏难度
+    AcpcState state				= 4;		// 游戏状态
+}
+
+/// NETMSG_BRAIN_ROBOT_ACTION
+message NetMsg_Brain_RobotAction_C2S
+{
+    uint32 robot_id             = 1;        // 机器人ID
+    uint32 action_seq           = 2;        // 行动序号
+    RobotActionInfo action_info = 3;        // 行动数据
+}
+
+/// NETMSG_BRAIN_ROBOT_ACTION
+message NetMsg_Brain_RobotAction_S2C
+{
+    uint32 robot_id             = 1;        // 机器人ID
+    uint32 action_seq           = 2;        // 行动序号   
+    uint32 action               = 3;        // 行动
+    uint32 size                 = 4;        // 加注值
+}
+
+//请求机器人加入房间  CMD_BRAIN_REQUEST_ROTOT_JOIN_ROOM
+message RequestRobotJoinRoom
+{
+    uint64 room_id              = 1;        // 房间ID
+    string password             = 2;        // 房间密码
+    uint32 game_type            = 3;        // 玩法类型 
+    repeated uint32 role_id     = 4;        // 玩家的roleID
+    string rm_test_param        = 5;        // 算法rm测试参数(自测版本有效)
+    int32 seat                  = 6;        // 位置
+    uint32 tpa_room_id          = 7;        // TPA系统的roomid
+}
+
+//请求机器人(线程)  CMD_BRAIN_REQUEST_CREATE_ROBOT&CMD_BRAIN_REQUEST_DESTROY_ROBOT
+message RequestRobotThread
+{
+    string  user_msg           = 1;        // 机器人信息, 机器人发送VERSION时, 原样拼接到后面即可
+    uint32  thread_id          = 2;        // 机器人对应的线程ID
+}
+
+//校验机器人是否有效  CMD_BRAIN_CHECK_ROBOT_VALID & CMD_BRAIN_CHECK_ROBOT_TIMEOUT
+message CheckRobotValid
+{
+    uint32  role_id            = 1;        // 机器人ID
+    uint64  room_id            = 2;        // 房间ID
+}
+

@@ -1,0 +1,98 @@
+syntax = "proto3";
+import "system.proto";
+import "acpc.proto";
+
+package Pb;
+
+//荷官的玩家信息
+/*message DealerPlayer
+{
+    uint32 role_id                  = 1;        // 角色ID
+    string role_name                = 2;        // 角色名称
+    uint32 seat                     = 3;        // 角色位置
+    uint32 position                 = 4;        // 玩家顺序号(每局都变)
+    repeated AcpcCard hole_cards    = 5;        // 私牌列表
+}
+
+// 荷官发牌协议 CMD_DEALER_DEAL_CARDS
+message DealerCards
+{
+    uint64 room_id                  = 1;        // 房间ID
+    uint32 hand_id                  = 2;        // hand_id
+    uint32 round                    = 3;        // 轮
+    repeated DealerPlayer players   = 4;        // 玩家的信息
+    repeated AcpcCard board_cards   = 5;        // 公牌列表
+    AcpcRoleAction robot_action     = 6;        // 机器人Action信息(支持Sophia功能字段)
+}*/
+
+message DRoleState
+{
+    uint32 role_id                      = 1;    // 角色ID
+    string role_name                    = 2;    // 角色名称
+    uint32 spent                        = 3;    // 总下注值
+    uint32 fold                         = 4;    // 弃牌标记 0:未弃牌 1:弃牌 
+    repeated AcpcCard hole_cards        = 5;    // 私牌 (finished!=1时仅有被通知玩家的私牌为有效值)
+    int32 Score                         = 6;    // 结算积分(finished=1时有效)
+    int32 turn                          = 7;    // 轮到玩家下注标记 0:否 1:是
+}
+
+message DRoleInfo
+{
+    uint32 role_id                      = 1;    // 角色ID
+    string role_name                    = 2;    // 角色名称
+    repeated AcpcCard hole_cards        = 3;    // 私牌 (finished!=1时仅有被通知玩家的私牌为有效值)
+}
+
+//请求发牌 CMD_DEALER_REQUEST_CARDS
+message DRequestCardsReq
+{
+    uint64 room_id                      = 1;    // 房间ID
+    uint32 hand_id                      = 2;    // hand_id
+    uint32 round                        = 3;    // 轮
+    uint32 dealer_seat                  = 4;    // 庄家的位置
+    repeated DRoleInfo role_info        = 5;    // 所有玩家的信息 (按位置顺序存储)
+    repeated AcpcCard board_cards       = 6;    // 已发的所有公牌
+}
+
+message DRequestCardsResp
+{
+    uint64 room_id                      = 1;    // 房间ID
+    uint32 hand_id                      = 2;    // hand_id
+    uint32 round                        = 3;    // 轮
+    repeated AcpcCard board_cards       = 4;    // 请求轮新发的公牌
+    repeated HoleCards hole_cards       = 5;    // 私牌(按位置顺序存储, round=0有效)
+}
+
+//通知游戏状态  CMD_DEALER_NOTIFY_MATCH_STATE
+message DNotifyMatchState
+{
+    uint64 room_id                      = 1;    // 房间标识	
+    uint32 mode                         = 2;    // 荷官模式 0:自动发牌 1:荷官平台发牌
+    uint32 dealer_seat                  = 3;    // 庄家的位置
+    uint32 hand_id                      = 4;    // 场次ID
+    uint32 round                        = 5;    // 当前轮 0:preflop 1:flop 2:turn 3:river
+    
+    uint32 finished                     = 6;    // 是否结束 0:未结束  1:结束
+    uint32 max_spent                    = 7;    // 最大加注
+    repeated AcpcCard board_cards       = 8;    // 公牌
+    repeated DRoleState role_state      = 9;    // 所有玩家的状态 (按位置顺序存储)
+    repeated RoleAction role_action	    = 10;   // 所有玩家的动作信息
+    repeated int32 round_spent          = 11;   // 各轮的下注值
+}
+
+
+
+//请求[区块链]发牌 CMD_BLOCK_CHAIN_REQUEST_CARDS
+message BCRequestCardsReq
+{
+    uint64 room_id                      = 1;    // 房间ID
+    uint32 hand_id                      = 2;    // hand_id
+}
+
+message BCRequestCardsResp
+{
+    uint64 room_id                      = 1;    // 房间ID
+    uint32 hand_id                      = 2;    // hand_id
+    repeated AcpcCard cards             = 3;    // 请求轮新发的公牌
+}
+

@@ -1,0 +1,123 @@
+syntax = "proto3";
+import "system.proto";
+package Pb;
+
+
+//已完成
+/// ****_SVR_REGISTER
+message CommSvrRegister
+{
+    ServerID  svr_id            = 1;        // 服务器ID
+    string server_name          = 2;        // 服务器名称
+    string addr                 = 3;        // 服务器IP
+    uint32 port                 = 4;        // 服务器端口
+    uint32 s_server_id          = 5;        // 服务器的ServerID
+    uint32 c_server_id          = 6;        // 客户端的ServerID
+}
+
+
+/// ****_SVR_UNREGISTER
+message CommSvrUnregister
+{
+    ServerID  svr_id            = 1;        // 服务器ID
+}
+
+/// CMD_COMM_KEEP_ALIVE
+message CommKeepAlive
+{
+    string msg                  = 1;        // 心跳消息
+}
+
+//CMD_BALANCE_ALLOC_ACPC_SERVER
+message AllocServerReq
+{
+    uint32 role_id              = 1;        // roleid
+    uint32 server_id            = 2;        // 指定的服务ID
+}
+
+message AllocServerResp
+{
+    uint32 role_id              = 1;        // roleid
+    uint32 server_id            = 2;        // 最终分配的服务ID
+    string server_ip            = 3;        // 服务IP
+    uint32 server_port          = 4;        // 服务端口
+}
+
+//CMD_BALANCE_ACPC_REPORT & CMD_ACPC_BRAIN_REPORT
+message ServerReport
+{
+    uint32 server_id            = 1;        // 服务器ID
+    uint32 room_cnt             = 2;        // 已创建的房间数   
+    uint32 robot_cnt            = 3;        // 机器人接入数
+}
+
+
+//游戏定义
+message GameDef
+{
+    uint32 betting_type             = 1;    // 0:limitBetting || 1:noLimitBetting
+    uint32 numPlayers               = 2;    // 玩家数
+    uint32 numRounds                = 3;    // 轮数
+    repeated uint32 stack           = 4;    // 每个玩家的最大筹码
+    repeated uint32 blind           = 5;    // 每位玩家游戏的入场费
+    repeated uint32 firstPlayer     = 6;    // 每轮第一个投注的玩家
+    uint32 numSuits                 = 7;    // 花色数
+    uint32 numRanks                 = 8;    // 牌数
+    uint32 numHoleCards             = 9;    // 私牌数
+    repeated uint32 numBoardCards   = 10;   // 每轮的公牌数
+    repeated uint32 raiseSize       = 11;   // 限注类型,固定加注大小
+    repeated uint32 maxRaises       = 12;   // 每轮进行的投注/加注次数
+}
+
+//比赛控制定义
+message MatchDef
+{
+    uint32 match_enable            = 1;     // 比赛开关 1:打开比赛模式 0:关闭比赛模式
+    uint32 match_hands             = 2;     // 比赛局数, match_enable=1有效
+}
+
+//查询游戏配置 CMD_BRAIN_QUERY_CONFIG&CMD_ACPC_QUERY_CONFIG
+message QueryGameConfig
+{
+    uint32 game_type                = 1;    // 游戏类型(0:请求所有)
+    string source_msg               = 2;    // 来源消息
+    repeated GameDef game_config    = 3;    // 游戏配置
+    string betting_control          = 4;    // 算法betting控制串
+    MatchDef match_config           = 5;    // 比赛控制配置
+}
+
+//监听的服务定义
+message ListenDef
+{
+    ServerID  svr_id            = 1;        // 服务器ID
+    string addr                 = 2;        // 服务器IP
+    uint32 port                 = 3;        // 服务器端口
+}
+
+//Acpc监听的服务  CMD_BALANCE_QUERY_LISTEN_SERVER
+message QueryListenServer
+{   
+    ServerID  req_server_id         = 1;    //请求的serverid
+    repeated ListenDef acpc_servers = 2;    //所有acpc服务的监听信息
+}
+
+
+message TpaRole
+{
+    uint32 role_id                      = 1;    // 用户标识
+    uint64 player_id	                = 2;    // Tpa用户标识	
+    int32  seat	                        = 3;    // 玩家位置	值范围(0 - [n-1])
+}
+
+//第三方用户登录 CMD_UM_TPA_LOGIN & CMD_BALANCE_TPA_ALLOC_ACPC_SERVER
+message TpaUserLogin
+{
+    uint32 tpa_room_id                  = 1;    // tpa房间标识	
+    uint32 game_type                    = 2;    // 游戏类型 201:两人桌[松] 202:两人桌[紧]  203:两人桌[凶]  204:两人桌[弱]
+    repeated TpaRole tpa_role_list      = 3;    // 玩家列表
+    
+    uint32 acpc_server_id               = 4;    // balance请求参数
+    string acpc_server_ip               = 5;    // balance应答参数
+    uint32 acpc_server_port             = 6;    // balance应答参数
+}
+

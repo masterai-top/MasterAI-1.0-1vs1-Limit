@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+import "system.proto";
+
+package Pb;
+
+/// CMD_UM_LOGIN
+message UmLoginReq
+{
+    string user_name            = 1;        // 用户名
+	uint32 login_type         	= 2;        // 登录类型 1:游客  2:注册用户
+    uint32 client_type          = 3;        // 客户端类型 1:client  2:web  3:H5
+    string password             = 4;        // 登录密码
+    ServerID server_id          = 5;        // apisvr服务id(长连接的登录需要填写,用于服务端推送消息)
+    uint64 tpa_player_id        = 6;        // 第三方接入的玩家ID
+}
+
+/// CMD_UM_LOGIN
+message UmLoginResp
+{
+    uint32 role_id              = 1;        // 角色ID
+    string role_name            = 2;        // 角色名称
+    string role_img             = 3;        // 角色头像
+    uint32 role_region          = 4;        // 区
+    uint32 role_server          = 5;        // 服
+    uint32 role_sex             = 6;        // 性别
+    uint32 role_level           = 7;        // 等级
+    int64  role_currency        = 8;        // 金钱
+    uint32 draw                 = 9;        // 平局数
+    uint32 win                  = 10;       // 赢局数
+    uint32 lose                 = 11;       // 输局数
+    string acpc_ip              = 12;       // 对战的服务器IP(不再使用)
+    uint32 acpc_port            = 13;       // 对战的服务器端口(不再使用)
+    uint64 room_id              = 14;       // 已加入的房间ID[断线重连]
+    uint64 view_room_id         = 15;       // 观看的房间ID
+    uint64 tpa_player_id        = 16;       // 第三方接入的玩家ID
+    uint32 acpc_server_id       = 17;       // acpcsvr服务ID[上次连接的acpcid]
+}
+
+/// CMD_UM_LOGOUT
+message UmLogout
+{
+    uint32 role_id              = 1;        // 角色ID	
+}
+
+/// CMD_UM_RECHARGE
+message UmRecharge
+{
+    uint32 role_id              = 1;        // 角色ID	
+    uint32 money                = 2;        // 充值额度
+}
+
+/// CMD_UM_ONLINE_PLAYERS
+message UmOnlinePlayers
+{
+    uint32 role_id              = 1;        // 角色ID	
+	uint32 players              = 2;        // 在线玩家人数
+}
+
+// CMD_UM_QUERY_USER_INFO
+message UmQueryUser
+{
+    uint32 role_id              = 1;        // 角色ID	
+    int32 money                 = 2;        // 金钱
+    uint32 win                  = 3;        // 赢
+    uint32 draw                 = 4;        // 平
+    uint32 lose                 = 5;        // 输
+    uint32 hand_id              = 6;        // 客户端填写,服务端原样返回
+}
+
+// CMD_UM_QUERY_USER_CONFIG
+message UmUserConfig
+{
+    uint32 role_id              = 1;        // 角色ID	
+    int32 money                 = 2;        // 金钱
+    uint32 win                  = 3;        // 赢局
+    uint32 draw                 = 4;        // 平局
+    uint32 lose                 = 5;        // 输局
+    uint32 reset_currency_times = 6;        // 重置钱币次数
+}
+
+//CMD_UM_USER_CONN_EXIT & CMD_UM_USER_CONN_FORCE_EXIT
+message UserConnExit
+{
+    uint32 role_id              = 1;        // 角色ID	
+    ServerID server_id          = 2;        // 连接归属的服务ID
+    uint32 conn_id              = 3;        // 连接ID
+}
+
+//CMD_UM_USER_RESET_CURRENCY
+message ResetCurrency
+{
+    uint32 role_id         = 1;        // 角色ID
+    uint32 currency        = 2;        // 金钱
+}
+
+//CMD_UM_RESET_USER_FOR_TEST
+message ResetUserForTest
+{
+    uint32 role_id              = 1;        // 角色ID(0表示重置所有用户)
+    int64  role_currency        = 2;        // 金钱
+    string cmd_password         = 3;        // 命令密码(role_id=0时需要验证密码)
+}
+
+//CMD_UM_QUERY_USER_MATCH_INFO
+message UmUserMatchInfo
+{
+    uint32 role_id              = 1;        // 角色ID	
+    int32  money                = 2;        // 金钱
+    uint32 hands                = 3;        // 已完成局数
+    uint32 tickets              = 4;        // 玩家拥有的门票
+    uint32 match_hands          = 5;        // 比赛总局数
+}
+
+
+
+
+
+
+

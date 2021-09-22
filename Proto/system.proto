@@ -1,0 +1,338 @@
+syntax = "proto3";
+
+package Pb;
+
+//命令字
+enum DP_CMD
+{   
+    CMD_NOT_DEFINE                      = 0;
+    CMD_COMM_NOT_BINARY                 = 90001;     // 非二进制类型命令  
+    CMD_COMM_SVR_UNREGISTER             = 10000;     // 服务器注销
+    
+    //BalanceSvr命令
+    CMD_BALANCE_SVR_REGISTER            = 10001;     // 服务器注册-接收其他服务(acpcsvr、apisvr、brainsvr)的注册
+    //CMD_BALANCE_SVR_UNREGISTER        = 10002;     // 服务器注销
+    CMD_BALANCE_SVR_KEEP_ALIVE          = 10003;     // 心跳消息
+    CMD_BALANCE_ACPC_REPORT             = 10005;     // Acpc的上报信息
+    CMD_BALANCE_ALLOC_BATTLE            = 10011;     // 分配对战服务(不再维护)
+    CMD_BALANCE_QUERY_LISTEN_SERVER     = 10012;     // 查询所有的监听服务(当前仅查询AcpcServer的监听信息)
+    CMD_BALANCE_ALLOC_ACPC_SERVER       = 10013;     // 分配对战服务
+    
+    CMD_BALANCE_TPA_ALLOC_ACPC_SERVER   = 10103;     // TPA分配对战服务
+    
+    //usmsvr命令
+    CMD_UM_SVR_REGISTER                 = 20001;     // 服务器注册-接收其他服务(apisvr)的注册
+    //CMD_UM_SVR_UNREGISTER             = 20002;     // 服务器注销
+    CMD_UM_SVR_KEEP_ALIVE               = 20003;     // 心跳消息
+    CMD_UM_LOGIN                        = 20011;     // 登陆
+    CMD_UM_LOGOUT                       = 20012;     // 注销
+    CMD_UM_RECHARGE                     = 20013;     // 重置金币
+    CMD_UM_ONLINE_PLAYERS               = 20014;     // 查询在线用户数
+    CMD_UM_QUERY_USER_INFO              = 20015;     // 查询用户积分信息(每局结束都需要调用)
+    CMD_UM_USER_CONN_EXIT               = 20016;     // 用户连接退出
+    CMD_UM_USER_CONN_FORCE_EXIT         = 20017;     // 强制用户连接退出
+    CMD_UM_USER_RESET_CURRENCY          = 20018;     // 重置金钱
+    CMD_UM_QUERY_USER_CONFIG            = 20019;     // 查询用户配置信息
+    CMD_UM_RESET_USER_FOR_TEST          = 20030;     // 重置用户(测试接口)
+    CMD_UM_QUERY_USER_MATCH_INFO        = 20031;     // 查询挑战赛用户的比赛信息
+    
+    CMD_UM_TPA_LOGIN                    = 20101;     // TPA用户登录 
+    
+    //acpcsvr命令
+    CMD_ACPC_SVR_REGISTER               = 30001;     // 服务器注册-接收其他服务(apisvr, brainsvr)的注册
+    //CMD_ACPC_SVR_UNREGISTER           = 30002;     // 服务器注销
+    CMD_ACPC_SVR_KEEP_ALIVE             = 30003;     // 心跳消息
+    CMD_ACPC_QUERY_CONFIG               = 30004;     // 查询配置
+    CMD_ACPC_BRAIN_REPORT               = 30005;     // Brain上报信息
+    CMD_ACPC_ROOM_CREATE                = 30011;     // 创建房间
+    CMD_ACPC_ROOM_ENTER                 = 30012;     // 加入房间
+    CMD_ACPC_ROOM_BROAD_ENTER           = 30013;     // 广播加入房间
+    CMD_ACPC_ROOM_LEAVE                 = 30014;     // 离开房间    
+    CMD_ACPC_ROOM_BROAD_LEAVE           = 30015;     // 广播离开房间    
+    CMD_ACPC_ROOM_FORCE_LEAVE           = 30016;     // 强制离开    
+    CMD_ACPC_ROOM_BROAD_FORCE_LEAVE     = 30017;     // 广播强制离开(目标是观众)    
+    CMD_ACPC_ROOM_QUERY_CAN_JOIN        = 30018;     // 查询可加入的房间
+    CMD_ACPC_ROOM_AUDIENCE_ENTER        = 30019;     // 观众加入房间
+    CMD_ACPC_ROOM_BROAD_AUDIENCE_ENTER  = 30020;     // 广播观众加入房间
+    CMD_ACPC_ROOM_AUDIENCE_LEAVE        = 30021;     // 观众离开房间
+    CMD_ACPC_ROOM_BROAD_AUDIENCE_LEAVE  = 30022;     // 广播观众离开房间
+    CMD_ACPC_ROOM_CHECK_TIMEOUT         = 30023;     // 校验房间是否超时
+    
+    CMD_ACPC_MATCH_READY                = 30031;     // 就绪 
+    CMD_ACPC_MATCH_BROAD_READY          = 30032;     // 广播玩家就绪     
+    CMD_ACPC_MATCH_BROAD_START          = 30033;     // 广播对战开始 
+    CMD_ACPC_MATCH_ACTION               = 30034;     // 对战下注 
+    CMD_ACPC_MATCH_STATE                = 30035;     // 对战状态 
+    CMD_ACPC_MATCH_SCORE                = 30036;     // 对战积分     
+    CMD_ACPC_QUERY_MATCH_STATE          = 30037;     // 查询游戏状态
+    CMD_ACPC_NOTIFY_TPA_MATCH_STATE     = 30038;     // (TPA)对战状态 
+    CMD_ACPC_DEL_ALL_ROOM_FOR_TEST      = 30041;     // 删除所有房间数据(测试接口)
+    CMD_ACPC_START_ROBOT_FOR_TEST       = 30042;     // 启动机器人vs机器人进行压力测试
+    CMD_ACPC_BROAD_MATCH_ACTION         = 30043;     // 对战下注广播
+    CMD_ACPC_SET_DEALER_MODE            = 30050;     // 设置荷官模式
+   
+    
+    CMD_ACPC_TPA_ENTER_ROOM             = 31011;     // 玩家加入房间
+    CMD_ACPC_TPA_AI_ENTER_ROOM          = 31012;     // 机器人加入房间
+    CMD_ACPC_TPA_LEAVE_ROOM             = 31014;     // 玩家退出房间
+    CMD_ACPC_TPA_DESTROY_ROOM           = 31015;     // 销毁房间通知
+    CMD_ACPC_TPA_SET_PLAYER_STATE       = 31017;     // 设置玩家状态(就绪)
+    CMD_ACPC_TPA_SET_DEALER             = 31018;     // 设置庄家
+    CMD_ACPC_TPA_QUERY_MATCH_CARDS      = 31021;     // 查询游戏扑克信息
+    CMD_ACPC_TPA_QUERY_ALLOW_ACTION     = 31022;     // 查询允许加注信息
+    CMD_ACPC_TPA_QUERY_MATCH_STATE      = 31023;     // 查询游戏状态信息
+    CMD_ACPC_TPA_QUERY_AI_ACTION        = 31024;     // 查询机器人决策
+    CMD_ACPC_TPA_REPORT_ACTION_TOKEN    = 31025;     // 上报决策行动指示 
+    CMD_ACPC_TPA_REPORT_PLAYER_ACTION   = 31026;     // 上报玩家决策结果
+    
+    //brainsvr命令
+    CMD_BRAIN_SVR_REGISTER              = 40001;     // 服务器注册-接收其他服务(brainbot)的注册
+    //CMD_BRAIN_SVR_UNREGISTER          = 40002;     // 服务器注销
+    CMD_BRAIN_SVR_KEEP_ALIVE            = 40003;     // 心跳消息
+    CMD_BRAIN_QUERY_CONFIG              = 40004;     // 查询配置
+    CMD_BRAIN_ROBOT_ALIVE               = 40010;     // 机器人的心跳消息
+    CMD_BRAIN_ROBOT_LOGIN               = 40011;     // 机器人登录
+    CMD_BRAIN_ROBOT_ACTION              = 40012;     // 机器人游戏操作   
+    CMD_BRAIN_ROBOT_EXIT                = 40013;     // 机器人退出(链接异常内部生成)
+    CMD_BRAIN_REQUEST_ROTOT_JOIN_ROOM   = 40014;     // 请求机器人加入
+    CMD_BRAIN_TO_ROBOT_CLIENT           = 40015;     // 发送至机器人客户端(日志使用)
+    CMD_BRAIN_CHECK_ROBOT_VALID         = 40016;     // 校验机器人是否有效
+    CMD_BRAIN_CHECK_ROBOT_TIMEOUT       = 40017;     // 校验机器人是否超时
+    CMD_BRAIN_REQUEST_CREATE_ROBOT      = 40021;     // 请求创建机器人
+    CMD_BRAIN_REQUEST_DESTROY_ROBOT     = 40022;     // 请求销毁机器人
+    CMD_BRAIN_ON_LINE_ROBOT             = 40023;     // 在线机器人信息
+    
+    //Dealer命令
+    CMD_DEALER_REGISTER                 = 50001;     // 客户端注册
+    CMD_DEALER_KEEP_ALIVE               = 50003;     // 客户端心跳
+    CMD_DEALER_REQUEST_CARDS            = 50005;     // 请求发牌
+    CMD_DEALER_NOTIFY_MATCH_STATE       = 50006;     // 推送MatchState
+    
+    //区块链荷官命令
+    CMD_BLOCK_CHAIN_REGISTER            = 51001;     // 注册
+    CMD_BLOCK_CHAIN_KEEP_ALIVE          = 51003;     // 心跳
+    CMD_BLOCK_CHAIN_REQUEST_CARDS       = 51004;     // 请求发牌
+    
+    
+    //tpasvr命令 ...  90001 开始.定义在tpa.proto
+}
+
+//错误码
+enum DP_ERRCODE 
+{
+    //公共错误码
+    OK                          = 0;            //成功
+    ERR_COMM_SYSTEM_BUSY        = 221001;       //系统忙
+    ERR_COMM_OTHER              = 221002;       //其他错误
+    ERR_COMM_LENGTH             = 221003;       //长度错误-在NetMsg类使用
+    ERR_COMM_INVALID_CMD        = 221004;       //模块收到非法的命令
+    ERR_COMM_PROTO_PARSE        = 221005;       //Proto协议解析错误
+    ERR_COMM_INTERNAL           = 221006;       //内部处理错误
+    ERR_COMM_NO_TASK_QUEUE      = 221007;       //业务队列不足
+    ERR_COMM_REDIS              = 221008;       //redis操作失败
+    ERR_COMM_INVALID_PARAM      = 221009;       //参数错误
+    ERR_COMM_NO_FREE_NODE       = 221010;       //无空闲节点
+    ERR_COMM_MEMORY             = 221011;       //内存错误
+    ERR_COMM_REDIS_LOCK         = 221012;       //获取redis锁失败
+    ERR_COMM_DB                 = 221013;       //数据库操作失败
+    
+    //BalanceSvr错误码
+    ERR_BALANCE_ACPC_BUSY       = 222001;       //无可用的acpc服务
+    ERR_BALANCE_BRAIN_BUSY      = 222002;       //无可用的brain服务
+    
+    //usmsvr错误码
+    ERR_UM_USER_NOT_EXIST       = 223001;       //用户不存在
+    ERR_UM_PASSWD               = 223002;       //密码错误    
+    ERR_UM_RESET_TIMES_LIMIT    = 223003;       //重置次数限制
+    ERR_UM_ALREADY_RESET        = 223004;       //已经重置了
+    
+    //acpcsvr错误码
+    ERR_ACPC_NOT_ROBOT          = 224001;       //无机器人资源
+    ERR_ACPC_INVALID_ACTION     = 224002;       //非法操作
+    ERR_ACPC_NO_PLAYER          = 224003;       //查找用户信息失败
+    ERR_ACPC_NO_ROOM            = 224004;       //查找房间信息失败
+    ERR_ACPC_NO_ROOM_QUEUE      = 224005;       //房间队列不足
+    ERR_ACPC_NO_PLAYER_QUEUE    = 224006;       //玩家队列不足
+    ERR_ACPC_ALLOC_ROOM         = 224007;       //分配房间失败
+    ERR_ACPC_NOT_IN_ROOM        = 224008;       //玩家不再房间中
+    ERR_ACPC_PLAYER_ROOM_SEAT   = 224009;       //玩家房间位置信息错误
+    ERR_ACPC_SET_ROLE_READY     = 224010;       //设置准备状态错误
+    ERR_ACPC_TOO_MANY_PLAYER    = 224011;       //玩家太多了
+    ERR_ACPC_ROOM_PLAYER_WRONG  = 224012;       //房间玩家编号错误
+    ERR_ACPC_MATCH_RUNNING      = 224021;       //游戏正在进行中
+    ERR_ACPC_MATCH_NOT_RUNNING  = 224022;       //游戏未在进行
+    ERR_ACPC_MATCH_FINISHED     = 224023;       //游戏已经结束
+    ERR_ACPC_GAME_TYPE          = 224024;       //游戏类型错误
+    ERR_ACPC_NOT_PLAYER_TURN    = 224025;       //不是该玩家的动作
+    ERR_ACPC_MATCH_RUN          = 224026;       //游戏开始错误
+    ERR_ACPC_ACTION             = 224027;       //错误的Action
+    ERR_ACPC_GET_CONFIG         = 224031;       //查询配置
+    ERR_ACPC_LEAVE_ROOM         = 224032;       //离开房间错误
+    ERR_ACPC_ROOM_CONFLICT      = 224033;       //房间冲突
+    ERR_ACPC_MATCH_HANDS_LIMIT  = 224034;       //比赛模式局数限制
+    ERR_ACPC_SELECT_BRAIN       = 224035;       //选择brain服务失败
+    ERR_ACPC_SET_DEALER_MODE    = 224036;       //设置荷官发牌模式失败         
+    ERR_ACPC_DEALER_DEAL_CARDS  = 224037;       //荷官发牌失败
+    
+    //brainsvr错误码
+    ERR_BRAIN_ALLOC_ROBOT_ID        = 225001;       //分配机器人ID失败
+    ERR_BRAIN_WAIT_ROBOT_JOIN       = 225002;       //等待机器人加入[不算错误]
+    ERR_BRAIN_CACHE_ROBOT           = 225003;       //缓存机器人信息错误
+    ERR_BRAIN_BIND_ROBOT            = 225004;       //绑定机器人错误
+    ERR_BRAIN_TOO_MANY_WAIT_PLAYER  = 225005;       // 太多等待匹配的玩家
+    ERR_BRAIN_CREATE_ROBOT          = 225006;       // 创建机器人失败
+    ERR_BRAIN_SELECT_BRAINBOT       = 225007;       // 选择指定的
+    ERR_BRAIN_GET_PLAYER            = 225011;       // 获取玩家信息失败
+    ERR_BRAIN_GET_ROBOT_CLIENT      = 225012;       // 获取机器人客户端信息失败
+    ERR_BRAIN_ACPC_TRANSFORM        = 225013;       // ACPC协议转换错误
+    ERR_BRAIN_GET_CONFIG            = 225021;       // 查询配置
+    
+    //tpasvr错误码 ... 229001开始,在tpa.proto定义  
+}
+
+//服务类型定义
+enum SERVER_TYPE
+{
+    SERVER_TYPE_UNKNOW          = 0;            //
+	SERVER_TYPE_BALANCE         = 1;            //bmsvr
+	SERVER_TYPE_UM 		        = 2;            //umsvr
+    SERVER_TYPE_ACPC		    = 3;            //acpcsvr
+    SERVER_TYPE_BRAIN		    = 4;            //brainsvr
+    SERVER_TYPE_BLOCKCHAIN      = 5;            // 区块链荷官模块
+    SERVER_TYPE_API             = 6;            // apisvr
+    SERVER_TYPE_BRAINBOT        = 7;            // brainbot
+    SERVER_TYPE_DEALER          = 8;            // 荷官
+    SERVER_TYPE_TPA             = 9;            // tpasvr(第三方对接模块:Third-party access)
+    SERVER_TYPE_CFR             = 10;           // cfrsvr模块
+    SERVER_TYPE_ALGAPI          = 11;           // 算法接口模块
+    
+};
+
+message ServerID
+{
+    uint32  reg_id              = 1;        // 服务器区ID(1-255)
+    uint32  type                = 2;        // 服务器类型(1-255), SERVER_TYPE
+    uint32 inst_id              = 3;        // 服务器实例ID(1-65535)
+}
+
+message AcpcAction
+{
+    int32 position              = 1;        // 行动的玩家位置
+    int32 action                = 2;        // 玩家行动类型
+    int32 size                  = 3;        // 加注值 [非加注为0]
+}
+
+message AcpcRound
+{
+    repeated AcpcAction actions = 1;        // 一回合玩家行动列表
+}
+
+message AcpcCard
+{
+    int32 rank                  = 1;        // 牌大小
+    int32 suit                  = 2;        // 牌花色
+    int32 highlight             = 3;        // 高亮
+}
+
+//私牌
+message HoleCards
+{
+    repeated AcpcCard hole_cards            = 1;        //玩家私牌列表
+}
+
+/// 角色对战积分
+message DRoleScore
+{
+    uint32 role_seat                        = 1;        // 座位号
+    uint32 role_id                          = 2;        // 角色ID
+    int32 score                             = 3;        // 积分
+}
+
+message AcpcState
+{
+    int32 hand_id                           = 1;        // 场次ID
+    int32 max_spent                         = 2;        // 当场最大下注值
+    int32 min_nolimit_raise_to              = 3;        // 当前加注最低值
+    repeated int32 spent                    = 4;        // 各玩家下注值
+    repeated AcpcRound round_actions        = 5;        // 各回合玩家行动
+    int32 round                             = 6;        // 当前回合[0 ~ round_actions_size]
+    int32 finished                          = 7;        // 是否结束
+    repeated int32 fold_players             = 8;        // 放弃的玩家列表 [未放弃为0，放弃为1]
+    repeated AcpcCard board_cards           = 9;        // 公牌列表
+    repeated AcpcCard hole_cards            = 10;       // (玩家自己的)私牌列表
+    uint32 cur_player_pos                   = 11;       // 当前轮到玩家的位置
+    repeated HoleCards player_hole_cards    = 12;       // 所有玩家的私牌列表,finished=1时会赋值,按position顺序排列
+    repeated int32 round_spent              = 13;       // 各轮的下注值
+    repeated string card_type               = 14;       // 牌型
+    repeated int32 score                    = 15;       // 玩家积分积分(按position顺序排列)--不使用
+    uint32 dealer_role_id                   = 16;       // 庄家RoleID
+    uint32 self_role_pos                    = 17;       // (接收该消息)角色的顺序号
+    repeated DRoleScore role_score          = 18;       // 玩家积分信息
+}
+
+/// 角色信息
+message RoleInfo
+{
+    uint32 role_id                          = 1;        // 角色ID
+    string role_name                        = 2;        // 角色名称
+    uint32 role_type                        = 3;        // 角色类型
+    string role_img                         = 4;        // 角色头像
+    uint32 role_seat                        = 5;        // 角色座位号
+    uint32 is_ready                         = 6;        // 是否已准备
+}
+
+// 房间的角色信息
+message RoomRole
+{
+    uint32 role_id                          = 1;        // 角色ID
+    uint32 role_seat                        = 2;        // 角色座位号
+    uint32 server_id                        = 3;        // 客户端连接
+    uint64 cliconn_id                       = 4;        // 客户端连接的ID
+    uint32 reset_id                         = 5;        // 重置ID
+    uint32 is_ready                         = 6;        // 是否已准备
+    uint32 hosted                           = 7;        // 托管状态
+    uint32 join_type                        = 8;        // 加入房间的方式
+}
+
+/// 角色列表
+message RoomRoleList
+{
+    repeated RoomRole role_info             = 1;        // 角色列表
+}
+
+/// 角色对战积分--不再使用
+message RoleScore
+{
+    uint32 role_seat                        = 1;        // 座位号
+    uint32 role_id                          = 2;        // 角色ID
+    string role_name                        = 3;        // 角色名称
+    int32 score                             = 4;        // 积分
+    repeated AcpcCard hole_cards            = 5;        // 私牌列表    
+}
+
+message RoomAttr
+{
+    uint32 role_id              = 1;        // 创建者角色ID
+    string role_name            = 2;        // 创建者角色名称
+    string room_name            = 3;        // 房间名称
+    uint32 game_type            = 4;        // 玩法类型
+    uint32 difficulty           = 5;        // 玩法难度
+    string password             = 6;        // 房间密码
+    string version              = 7;        // 版本信息 
+    uint32 server_id            = 8;        // 请求创建的服务器ID
+}
+
+
+message RoomCanJoin
+{
+    uint32 role_id              = 1;        // 创建者角色ID
+    string role_name            = 2;        // 创建者角色名称
+    string room_name            = 3;        // 房间名称
+    uint32 game_type            = 4;        // 玩法类型
+    uint32 difficulty           = 5;        // 玩法难度
+    string version              = 6;        // 版本信息 
+    uint32 server_id            = 7;        // 请求创建的服务器ID
+    uint32 player_cnt           = 8;        // 玩家人数
+}
+
+
