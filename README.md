@@ -4,6 +4,7 @@
 ## Introduction
 
 MasterAI is an AI poker dedicated to suport n-play (single- or multi-agent) Texas Hold'em imperfect-informatin games. It has been achieving exceptionally good results by using its propretary algorithm. In September 2020, it defeated 14 top human poker professionals. 
+MasterAI 是Master团队在非完美信息博弈中实现的的一种扑克AI，在德州扑克一对一的有限押注已经取得一定成果，MasterAI于2020年9月战胜了中国的14位顶级扑克职业选手。
 
 ## Technology
 
