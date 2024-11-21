@@ -43,8 +43,7 @@ MasterAI赛事情况如下 ：
 ![微信图片_20241030103520](https://github.com/user-attachments/assets/3fd8c2d9-8dde-42a9-a82f-1f8677610735)
 
 
-有对Master AI  1对1 训练模式和核心算法代码感兴趣或者意向者可以联系：Telegram：@alibaba401
-
+有对Master AI  1对1 训练模式和核心算法代码感兴趣或者意向购买源码者可以联系：Telegram：@xuzongbin001
 
 
 
